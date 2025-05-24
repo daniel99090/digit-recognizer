@@ -4,6 +4,7 @@ Implements a fully connected feed forward network using stochastic gradient desc
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class DigitRecognizer {
     public static final String INPUT_BIASES_FILE_NAME = "biases.csv";
     public static final String OUTPUT_WEIGHTS_FILE_NAME = "output_weights.csv";
     public static final String OUTPUT_BIASES_FILE_NAME = "output_biases.csv";
+    public static final String DATA_FILE_NOT_FOUND_MESSAGE = "Data not currently availible. Training and testing data are not included in the repo. Reference README.md for where to access mnist data sets.";
     public static int[][] ACCURACY_DATA = new int[2][10];
     public static int[][] TESTING_SUCCESS = new int[10000][3];
     
@@ -267,6 +269,12 @@ public class DigitRecognizer {
         try {
             //get all number representations
             Matrix[][] dataFromFile = Input.getTestingData(TESTING_DATA_FILE_NAME);
+
+            if (dataFromFile == null) {
+                System.out.println(DATA_FILE_NOT_FOUND_MESSAGE);
+                return;
+            }
+
             Matrix[] pixels = dataFromFile[1];
             runTestingCases(dataFromFile[1],dataFromFile[0],weights,biases, true);
 
@@ -288,6 +296,12 @@ public class DigitRecognizer {
         try {
             //get all number representations
             Matrix[][] dataFromFile = Input.getTestingData(TESTING_DATA_FILE_NAME);
+
+            if (dataFromFile == null) {
+                System.out.println(DATA_FILE_NOT_FOUND_MESSAGE);
+                return;
+            }
+
             Matrix[] pixels = dataFromFile[1];
             runTestingCases(dataFromFile[1],dataFromFile[0],weights,biases, true);
 
@@ -316,6 +330,12 @@ public class DigitRecognizer {
         Matrix[][] values = {initialWeightsMatrices,initialBiasesMatrices};
 
         Matrix[][] dataFromFile = Input.getTestingData(TRAINING_DATA_FILE_NAME);
+
+        if (dataFromFile == null) {
+            System.out.println(DATA_FILE_NOT_FOUND_MESSAGE);
+            return null;
+        }
+
         Matrix[] correctOutputsMatrices = dataFromFile[0];
         Matrix[] trainingDataMatrices = dataFromFile[1];
 
@@ -355,6 +375,11 @@ public class DigitRecognizer {
     public static void runData(Matrix[] weights, Matrix[] biases, String fileName) throws IOException {
         // get data to test network on
         Matrix[][] dataFromFile = Input.getTestingData(fileName);
+
+        if (dataFromFile == null) {
+            System.out.println(DATA_FILE_NOT_FOUND_MESSAGE);
+            return;
+        }
 
         // run testing cases and print accuracy data
         System.out.println("ACCURACY: ");
@@ -718,6 +743,10 @@ class Input {
     }
 
     public static Matrix[][] getTestingData(String fileName) throws IOException{
+        // check for file
+        File file = new File(fileName);
+        if (!file.exists()) return null;
+
         BufferedReader csvReader = new BufferedReader(new FileReader(fileName));
         String currentLine;
         int correctValue;
